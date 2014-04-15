@@ -8,11 +8,17 @@ from path import path
 import logging
 
 logger = logging.getLogger('amitu.stats')
+hdlr = logging.FileHandler('/tmp/stats.log')
+formatter = logging.Formatter(
+    '%(asctime)s %(levelname)s: %(filename)s:%(lineno)s %(message)s'
+)
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.DEBUG)
 
 STACK_FILE = path("stack.dat")
-
+WRITE_ALWAYS = False
 STACK = {}
-stack = {}
 
 def load_stack():
     global STACK
@@ -68,6 +74,8 @@ def gen(key_or_func):
                     logger.info("%s not found in stack, computing" % name)
                 val = key_or_func()
                 STACK[name] = val
+                if WRITE_ALWAYS:
+                    write_stack()
                 return val
         return decorated
     else:
@@ -87,9 +95,16 @@ def gen(key_or_func):
                         logger.info("%s not found in stack, computing" % name)
                     val = func(**kw)
                     STACK[name] = val
+                    if WRITE_ALWAYS:
+                        write_stack()
                     return val
             return decorated
         return decorator
 
-def init():
-	atexit.register(write_stack)
+def init(write_always=False):
+    if write_always:
+        WRITE_ALWAYS = True
+    else:
+	   atexit.register(write_stack)
+    load_stack()
+    logger.info("initialized with %s", STACK_FILE.abspath())
