@@ -72,7 +72,7 @@ def qry(query, *args, **kw):
 	return result
 
 def qry2(pre, *posts, **kw):
-	if not isinstance(pre, "basestring"): # assume list or tuple
+	if not isinstance(pre, basestring): # assume list or tuple
 		pre = "select %s" % " ".join(pre)
 	if "select" not in pre:
 		pre = "select %s" % pre
