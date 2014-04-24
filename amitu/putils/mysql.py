@@ -66,16 +66,25 @@ def qry(query, *args, **kw):
 	if kw.get("count"):
 		result = result[0][0]
 
-	if kw.get("singles") or kw.get("singles"):
+	if kw.get("singles") or kw.get("single"):
 		result = [x[0] for x in result]
 
 	return result
 
 def qry2(pre, *posts, **kw):
+	if not isinstance(pre, "basestring"): # assume list or tuple
+		pre = "select %s" % " ".join(pre)
+	if "select" not in pre:
+		pre = "select %s" % pre
 	return qry("%s from %s %s" % (pre, tname, " ".join(posts)), **kw)
 
 def q(query, *args):
+	"q(query), query and return HTML"
 	return table(*qry(query, *args, headers=True))
+
+def q2(pre, *posts, **kw):
+	"q2(pre, *posts, count=False, singles=False), qry2 and show HTML table."
+	return table(qry2(pre, *posts, **kw))
 
 def table(headers, rows):
 	return HTML(TEMPLATE.render(headers=headers, rows=rows))
